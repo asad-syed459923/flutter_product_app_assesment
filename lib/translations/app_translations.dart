@@ -16,6 +16,11 @@ class AppTranslations extends Translations {
       'english': 'English',
       'urdu': 'Urdu',
       'version': 'Version',
+      'brand': 'Brand',
+      'category': 'Category',
+      'updated_at': 'Updated: ',
+      'availability': 'Availability',
+      'warranty': 'Warranty',
     },
     'ur_PK': {
       'title': 'پراڈکٹ اسٹور',
@@ -30,6 +35,11 @@ class AppTranslations extends Translations {
       'english': 'انگریزی',
       'urdu': 'اردو',
       'version': 'ورژن',
+      'brand': 'برانڈ',
+      'category': 'زمرہ',
+      'updated_at': 'اپ ڈیٹ شدہ: ',
+      'availability': 'دستیابی',
+      'warranty': 'وارنٹی',
     },
   };
 }

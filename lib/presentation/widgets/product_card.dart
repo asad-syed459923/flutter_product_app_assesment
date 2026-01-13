@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../domain/entities/product.dart';
 
@@ -28,18 +29,22 @@ class ProductCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
                   child: CachedNetworkImage(
                     imageUrl: product.thumbnail,
                     height: 120,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Container(color: Colors.white, height: 120),
-                    ),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                    placeholder:
+                        (context, url) => Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(color: Colors.white, height: 120),
+                        ),
+                    errorWidget:
+                        (context, url, error) => const Icon(Icons.error),
                   ),
                 ),
                 Positioned(
@@ -48,11 +53,7 @@ class ProductCard extends StatelessWidget {
                   child: CircleAvatar(
                     backgroundColor: Colors.white.withOpacity(0.8),
                     radius: 14,
-                    child: Icon(
-                      Icons.star,
-                      size: 16,
-                      color: Colors.amber,
-                    ),
+                    child: Icon(Icons.star, size: 16, color: Colors.amber),
                   ),
                 ),
                 Positioned(
@@ -72,11 +73,13 @@ class ProductCard extends StatelessWidget {
                     product.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${product.brand} - ${product.category}',
+                    '${'brand'.tr}: ${product.brand} - ${'category'.tr}: ${product.category}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 10, color: Colors.grey[600]),
@@ -111,13 +114,13 @@ class ProductCard extends StatelessWidget {
                       _buildBadge(product.warrantyInformation, Colors.orange),
                     ],
                   ),
-                   const SizedBox(height: 4),
-                   Text(
-                    'Updated: ${product.updatedAt.split('T').first}',
+                  const SizedBox(height: 4),
+                  Text(
+                    '${'updated_at'.tr}${product.updatedAt.split('T').first}',
                     style: TextStyle(fontSize: 9, color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
-                   Row(
+                  Row(
                     children: [
                       Icon(Icons.star, size: 12, color: Colors.amber),
                       SizedBox(width: 2),
@@ -127,7 +130,9 @@ class ProductCard extends StatelessWidget {
                         InkWell(
                           onTap: onFavoriteToggle,
                           child: Icon(
-                            product.isFavorite ? Icons.favorite : Icons.favorite_border,
+                            product.isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
                             color: Colors.red,
                             size: 20,
                           ),
@@ -153,7 +158,11 @@ class ProductCard extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 9,
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

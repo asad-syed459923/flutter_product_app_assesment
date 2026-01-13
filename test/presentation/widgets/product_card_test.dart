@@ -38,7 +38,7 @@ void main() {
       );
 
       expect(find.text('Test Product'), findsOneWidget);
-      expect(find.text('Brand - Cat'), findsOneWidget); // Brand - Category
+      expect(find.text('Brand: Brand - Category: Cat'), findsOneWidget); 
       expect(find.text('\$100.0'), findsOneWidget); // crossed out price
       expect(find.text('\$90.00'), findsOneWidget); // discounted price
       expect(find.text('4.5'), findsOneWidget);

@@ -20,33 +20,34 @@ class DependencyInjection {
     final dio = Dio();
     Get.put<ApiClient>(ApiClient(dio: dio));
     Get.put<NetworkInfo>(NetworkInfoImpl(Connectivity()));
-    
-    final dbService = DbService(); 
+
+    final dbService = DbService();
     await dbService.init();
     Get.put<DbService>(dbService);
 
-    // Repositories
-    Get.put<ProductRepository>(ProductRepositoryImpl(
-      apiClient: Get.find(),
-      dbService: Get.find(),
-      networkInfo: Get.find(),
-    ));
+    Get.put<ProductRepository>(
+      ProductRepositoryImpl(
+        apiClient: Get.find(),
+        dbService: Get.find(),
+        networkInfo: Get.find(),
+      ),
+    );
 
-    // UseCases
     Get.put(GetProductsUseCase(Get.find()));
     Get.put(SearchProductsUseCase(Get.find()));
     Get.put(GetFavoritesUseCase(Get.find()));
     Get.put(ToggleFavoriteUseCase(Get.find()));
 
-    // Controllers (Register as Singleton or Factory? Settings is Singleton. Product often Singleton or Scoped. Let's make them singletons for simplicity here or lazy)
     Get.put<SettingsController>(SettingsController());
-    Get.put<ProductController>(ProductController(
-      getProductsUseCase: Get.find(),
-      searchProductsUseCase: Get.find(),
-      toggleFavoriteUseCase: Get.find(),
-    ));
-    Get.put<FavoritesController>(FavoritesController(
-      getFavoritesUseCase: Get.find(),
-    ));
+    Get.put<ProductController>(
+      ProductController(
+        getProductsUseCase: Get.find(),
+        searchProductsUseCase: Get.find(),
+        toggleFavoriteUseCase: Get.find(),
+      ),
+    );
+    Get.put<FavoritesController>(
+      FavoritesController(getFavoritesUseCase: Get.find()),
+    );
   }
 }
