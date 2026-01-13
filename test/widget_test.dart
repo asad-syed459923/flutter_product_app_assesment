@@ -1,30 +1,64 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:get/get.dart';
+import 'package:mockito/mockito.dart';
+import 'package:network_image_mock/network_image_mock.dart';
 import 'package:flutter_product_app_assesment/main.dart';
+import 'package:flutter_product_app_assesment/presentation/pages/product_list_screen.dart';
+import 'package:flutter_product_app_assesment/domain/entities/product.dart';
+import 'package:flutter_product_app_assesment/presentation/controllers/product_controller.dart';
+import 'helpers/test_helper.mocks.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  late MockProductController mockController;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUp(() {
+    Get.reset();
+    mockController = MockProductController();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Stubbing Rx variables to return real Rx objects so Obx works
+    when(mockController.products).thenReturn(<Product>[].obs);
+    when(mockController.isLoading).thenReturn(false.obs);
+    when(mockController.isMoreLoading).thenReturn(false.obs);
+    when(mockController.errorMessage).thenReturn(''.obs);
+    when(mockController.isSearching).thenReturn(false.obs);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Stubbing Getter usage for Controllers
+    when(mockController.searchController).thenReturn(TextEditingController());
+    when(mockController.scrollController).thenReturn(ScrollController());
+
+    // Stubbing GetX Lifecycle
+    final callback = InternalFinalCallback<void>(callback: () {});
+    when(mockController.onStart).thenReturn(callback);
+    when(mockController.onDelete).thenReturn(callback);
+
+    // Stubbing Methods usually returns Future<void> or void
+    when(
+      mockController.fetchProducts(isRefresh: anyNamed('isRefresh')),
+    ).thenAnswer((_) async {});
+    when(mockController.onSearchChanged(any)).thenReturn(null);
   });
+
+  tearDown(() {
+    Get.reset();
+  });
+
+  testWidgets(
+    'ProductListScreen loads and shows title and no products message',
+    (WidgetTester tester) async {
+      // Inject mock controller
+      Get.put<ProductController>(mockController);
+
+      await mockNetworkImagesFor(() async {
+        // Pump MyApp
+        await tester.pumpWidget(const ProductAssessment());
+        await tester.pumpAndSettle();
+      });
+
+      // Verify
+      expect(find.byType(ProductListScreen), findsOneWidget);
+      expect(find.text('Product Store'), findsOneWidget);
+      expect(find.text('No products found.'), findsOneWidget);
+    },
+  );
 }

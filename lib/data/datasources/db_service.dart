@@ -1,94 +1,58 @@
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
-import '../../core/constants/app_constants.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../models/product_model.dart';
+
 
 class DbService {
-  static Database? _database;
+  static const String productsBoxName = 'products_box';
+  static const String favoritesBoxName = 'favorites_box';
+  static const String settingsBoxName = 'settings_box';
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDB(AppConstants.dbName);
-    return _database!;
-  }
+  Box<ProductModel>? _productsBox;
+  Box<ProductModel>? _favoritesBox;
+  Box? _settingsBox;
 
-  Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
-
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _createDB,
-    );
-  }
-
-  Future _createDB(Database db, int version) async {
-    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
-    const textType = 'TEXT NOT NULL';
-    const intType = 'INTEGER NOT NULL';
-    const realType = 'REAL NOT NULL';
-    const boolType = 'INTEGER NOT NULL'; // 0 for false, 1 for true
-
-    // Products Table
-    await db.execute('''
-    CREATE TABLE ${AppConstants.tableNameProducts} (
-      id $intType,
-      title $textType,
-      description $textType,
-      category $textType,
-      price $realType,
-      discountPercentage $realType,
-      rating $realType,
-      stock $intType,
-      brand $textType,
-      thumbnail $textType,
-      images $textType,
-      availabilityStatus $textType,
-      warrantyInformation $textType,
-      updatedAt $textType,
-      isFavorite $boolType
-    )
-    ''');
+  Future<void> init() async {
+    // Initialize Hive
+    // path_provider is included in hive_flutter usually but explicit checking is good
+    // Hive.initFlutter() handles path automatically.
+    await Hive.initFlutter();
     
-    await db.execute('''
-    CREATE TABLE ${AppConstants.tableNameFavorites} (
-      id $intType PRIMARY KEY,
-      title $textType,
-      description $textType,
-      category $textType,
-      price $realType,
-      discountPercentage $realType,
-      rating $realType,
-      stock $intType,
-      brand $textType,
-      thumbnail $textType,
-      images $textType,
-      availabilityStatus $textType,
-      warrantyInformation $textType,
-      updatedAt $textType
-    )
-    ''');
+    // Register Adapters
+    if (!Hive.isAdapterRegistered(0)) {
+       Hive.registerAdapter(ProductModelAdapter());
+    }
 
-    // Settings Table for Localization and Theming
-    await db.execute('''
-    CREATE TABLE settings (
-      key $textType PRIMARY KEY,
-      value $textType
-    )
-    ''');
+    _productsBox = await Hive.openBox<ProductModel>(productsBoxName);
+    _favoritesBox = await Hive.openBox<ProductModel>(favoritesBoxName);
+    _settingsBox = await Hive.openBox(settingsBoxName);
+  }
+
+  Box<ProductModel> get productsBox {
+    if (_productsBox == null) {
+      throw Exception('DbService not initialized. Call init() first.');
+    }
+    return _productsBox!;
+  }
+
+  Box<ProductModel> get favoritesBox {
+    if (_favoritesBox == null) {
+      throw Exception('DbService not initialized. Call init() first.');
+    }
+    return _favoritesBox!;
+  }
+
+  Box get settingsBox {
+    if (_settingsBox == null) {
+      throw Exception('DbService not initialized. Call init() first.');
+    }
+    return _settingsBox!;
   }
 
   Future<void> saveSetting(String key, String value) async {
-    final db = await database;
-    await db.insert('settings', {'key': key, 'value': value}, conflictAlgorithm: ConflictAlgorithm.replace);
+    await settingsBox.put(key, value);
   }
 
   Future<String?> getSetting(String key) async {
-    final db = await database;
-    final maps = await db.query('settings', where: 'key = ?', whereArgs: [key]);
-    if (maps.isNotEmpty) {
-      return maps.first['value'] as String;
-    }
-    return null;
+    return settingsBox.get(key) as String?;
   }
 }

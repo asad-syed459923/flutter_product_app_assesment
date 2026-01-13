@@ -38,9 +38,13 @@ void main() {
       );
 
       expect(find.text('Test Product'), findsOneWidget);
+      expect(find.text('Brand - Cat'), findsOneWidget); // Brand - Category
       expect(find.text('\$100.0'), findsOneWidget); // crossed out price
       expect(find.text('\$90.00'), findsOneWidget); // discounted price
       expect(find.text('4.5'), findsOneWidget);
+      expect(find.text('In Stock'), findsOneWidget);
+      expect(find.text('1 Year'), findsOneWidget);
+      expect(find.text('Updated: 2023-01-01'), findsOneWidget);
       expect(find.byIcon(Icons.favorite_border), findsOneWidget);
     });
   });

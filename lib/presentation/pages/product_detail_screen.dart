@@ -10,7 +10,8 @@ class ProductDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Product product = Get.arguments;
-    final ProductController productController = Get.find(); // Find existing controller
+    final ProductController productController =
+        Get.find(); // Find existing controller
 
     return Scaffold(
       body: CustomScrollView(
@@ -25,15 +26,10 @@ class ProductDetailScreen extends StatelessWidget {
               ),
             ),
             actions: [
-              // We need to adhere to reactivity if we want button to change. 
-              // Since 'product' passed in arguments is static snapshot, 
-              // we can observe the product in controller.products list if we want live updates,
-              // or just implement a local toggle visual.
-              // For simplicity, just an icon that calls controller.
-               IconButton(
-                  icon: const Icon(Icons.favorite_border), // Just a static icon for now or check status
-                  onPressed: () => productController.toggleFavorite(product),
-                ),
+              IconButton(
+                icon: const Icon(Icons.favorite_border),
+                onPressed: () => productController.toggleFavorite(product),
+              ),
             ],
           ),
           SliverList(
@@ -45,20 +41,27 @@ class ProductDetailScreen extends StatelessWidget {
                   children: [
                     Text(
                       product.title,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.blueAccent.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             product.category,
-                            style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.blueAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         const Spacer(),
@@ -66,7 +69,10 @@ class ProductDetailScreen extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           '${product.rating}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
@@ -77,7 +83,9 @@ class ProductDetailScreen extends StatelessWidget {
                       children: [
                         Text(
                           '\$${product.discountedPrice.toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineMedium?.copyWith(
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
@@ -94,7 +102,10 @@ class ProductDetailScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           '(${product.discountPercentage}% off)',
-                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -103,7 +114,9 @@ class ProductDetailScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       'Description',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -115,12 +128,16 @@ class ProductDetailScreen extends StatelessWidget {
                     _buildInfoRow('Availability', product.availabilityStatus),
                     _buildInfoRow('Warranty', product.warrantyInformation),
                     _buildInfoRow('Stock', '${product.stock}'),
-                    _buildInfoRow('Updated At', product.updatedAt.split('T').first), // Simple format
+                    _buildInfoRow(
+                      'Updated At',
+                      product.updatedAt.split('T').first,
+                    ), // Simple format
                     const SizedBox(height: 16),
                     if (product.images.isNotEmpty) ...[
                       Text(
                         'Gallery',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       SizedBox(
@@ -166,7 +183,10 @@ class ProductDetailScreen extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           Expanded(

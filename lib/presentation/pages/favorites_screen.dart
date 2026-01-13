@@ -9,7 +9,7 @@ class FavoritesScreen extends GetView<FavoritesController> {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure we reload favorites when entering screen
+    
     controller.loadFavorites();
 
     return Scaffold(
@@ -35,7 +35,7 @@ class FavoritesScreen extends GetView<FavoritesController> {
             return ProductCard(
               product: product,
               onTap: () => Get.toNamed(Routes.DETAILS, arguments: product),
-              onFavoriteToggle: null, // Removed toggle here or implement removal
+              onFavoriteToggle: null, 
             );
           },
         );

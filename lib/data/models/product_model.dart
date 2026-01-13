@@ -1,24 +1,90 @@
 import 'dart:convert';
+import 'package:hive/hive.dart';
 import '../../domain/entities/product.dart';
 
+part 'product_model.g.dart';
+
+@HiveType(typeId: 0)
 class ProductModel extends Product {
+  @override
+  @HiveField(0)
+  final int id;
+  @override
+  @HiveField(1)
+  final String title;
+  @override
+  @HiveField(2)
+  final String description;
+  @override
+  @HiveField(3)
+  final String category;
+  @override
+  @HiveField(4)
+  final double price;
+  @override
+  @HiveField(5)
+  final double discountPercentage;
+  @override
+  @HiveField(6)
+  final double rating;
+  @override
+  @HiveField(7)
+  final int stock;
+  @override
+  @HiveField(8)
+  final String brand;
+  @override
+  @HiveField(9)
+  final String thumbnail;
+  @override
+  @HiveField(10)
+  final List<String> images;
+  @override
+  @HiveField(11)
+  final String availabilityStatus;
+  @override
+  @HiveField(12)
+  final String warrantyInformation;
+  @override
+  @HiveField(13)
+  final String updatedAt;
+  @override
+  @HiveField(14)
+  final bool isFavorite;
+
   const ProductModel({
-    required super.id,
-    required super.title,
-    required super.description,
-    required super.category,
-    required super.price,
-    required super.discountPercentage,
-    required super.rating,
-    required super.stock,
-    required super.brand,
-    required super.thumbnail,
-    required super.images,
-    required super.availabilityStatus,
-    required super.warrantyInformation,
-    required super.updatedAt,
-    super.isFavorite,
-  });
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.price,
+    required this.discountPercentage,
+    required this.rating,
+    required this.stock,
+    required this.brand,
+    required this.thumbnail,
+    required this.images,
+    required this.availabilityStatus,
+    required this.warrantyInformation,
+    required this.updatedAt,
+    this.isFavorite = false,
+  }) : super(
+          id: id,
+          title: title,
+          description: description,
+          category: category,
+          price: price,
+          discountPercentage: discountPercentage,
+          rating: rating,
+          stock: stock,
+          brand: brand,
+          thumbnail: thumbnail,
+          images: images,
+          availabilityStatus: availabilityStatus,
+          warrantyInformation: warrantyInformation,
+          updatedAt: updatedAt,
+          isFavorite: isFavorite,
+        );
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -36,6 +102,7 @@ class ProductModel extends Product {
       availabilityStatus: json['availabilityStatus'] ?? 'Unknown',
       warrantyInformation: json['warrantyInformation'] ?? 'No Warranty Info',
       updatedAt: json['meta']?['updatedAt'] ?? DateTime.now().toIso8601String(),
+      isFavorite: json['isFavorite'] ?? false,
     );
   }
 
@@ -51,7 +118,7 @@ class ProductModel extends Product {
       'stock': stock,
       'brand': brand,
       'thumbnail': thumbnail,
-      'images': jsonEncode(images), // Storing list as string for SQLite
+      'images': images,
       'availabilityStatus': availabilityStatus,
       'warrantyInformation': warrantyInformation,
       'updatedAt': updatedAt,

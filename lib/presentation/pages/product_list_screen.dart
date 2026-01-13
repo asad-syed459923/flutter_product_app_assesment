@@ -32,7 +32,9 @@ class ProductListScreen extends GetView<ProductController> {
               decoration: InputDecoration(
                 hintText: 'search'.tr,
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onChanged: (value) {
                 controller.onSearchChanged(value);
@@ -41,43 +43,49 @@ class ProductListScreen extends GetView<ProductController> {
           ),
           Expanded(
             child: Obx(() {
-               if (controller.isLoading.value && controller.products.isEmpty) {
-                 return const Center(child: CircularProgressIndicator());
-               }
-               
-               if (controller.errorMessage.isNotEmpty && controller.products.isEmpty) {
-                 return Center(child: Text(controller.errorMessage.value));
-               }
+              if (controller.isLoading.value && controller.products.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-               if (controller.products.isEmpty) {
-                 return Center(child: Text('no_products'.tr));
-               }
+              if (controller.errorMessage.isNotEmpty &&
+                  controller.products.isEmpty) {
+                return Center(child: Text(controller.errorMessage.value));
+              }
 
-               return RefreshIndicator(
-                 onRefresh: () async => await controller.fetchProducts(isRefresh: true),
-                 child: GridView.builder(
-                   controller: controller.scrollController,
-                   padding: const EdgeInsets.all(8),
-                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                     crossAxisCount: 2,
-                     childAspectRatio: 0.7,
-                     crossAxisSpacing: 8,
-                     mainAxisSpacing: 8,
-                   ),
-                   itemCount: controller.products.length + (controller.isMoreLoading.value ? 1 : 0),
-                   itemBuilder: (context, index) {
-                     if (index == controller.products.length) {
-                       return const Center(child: CircularProgressIndicator());
-                     }
-                     final product = controller.products[index];
-                     return ProductCard(
-                       product: product,
-                       onTap: () => Get.toNamed(Routes.DETAILS, arguments: product),
-                       onFavoriteToggle: () => controller.toggleFavorite(product),
-                     );
-                   },
-                 ),
-               );
+              if (controller.products.isEmpty) {
+                return Center(child: Text('no_products'.tr));
+              }
+
+              return RefreshIndicator(
+                onRefresh:
+                    () async => await controller.fetchProducts(isRefresh: true),
+                child: GridView.builder(
+                  controller: controller.scrollController,
+                  padding: const EdgeInsets.all(8),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.55,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount:
+                      controller.products.length +
+                      (controller.isMoreLoading.value ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == controller.products.length) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final product = controller.products[index];
+                    return ProductCard(
+                      product: product,
+                      onTap:
+                          () => Get.toNamed(Routes.DETAILS, arguments: product),
+                      onFavoriteToggle:
+                          () => controller.toggleFavorite(product),
+                    );
+                  },
+                ),
+              );
             }),
           ),
         ],

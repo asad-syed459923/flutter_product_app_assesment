@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:sqflite/sqflite.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/api_client.dart';
@@ -21,11 +20,10 @@ class ProductRepositoryImpl implements ProductRepository {
   });
 
   @override
-  Future<Either<Failure, List<Product>>> getProducts(int skip, int limit) async {
-    // Internet First logic as requested? 
-    // Wait, prompt says: "Use internet first mechanism for data fetch"
-    // "Implement caching for Products..."
-    
+  Future<Either<Failure, List<Product>>> getProducts(
+    int skip,
+    int limit,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final response = await apiClient.get(
@@ -33,35 +31,81 @@ class ProductRepositoryImpl implements ProductRepository {
           queryParameters: {'skip': skip, 'limit': limit},
         );
 
-        final List productsJson = response.data['products'];
-        final products = productsJson.map((e) => ProductModel.fromJson(e)).toList();
+        final List productsRaw = response.data['products'];
+
+        // Fetch local favorites to merge status
+        // Efficient enough for Hive map lookup
+        final favBox = dbService.favoritesBox;
+
+        final products =
+            productsRaw.map((e) {
+              final json = e as Map<String, dynamic>;
+              final id = json['id'];
+              // Check if favorite
+              json['isFavorite'] = favBox.containsKey(id);
+              return ProductModel.fromJson(json);
+            }).toList();
 
         // Cache products
-        final db = await dbService.database;
-        final batch = db.batch();
+        final prodBox = dbService.productsBox;
         for (var product in products) {
-          batch.insert(
-            AppConstants.tableNameProducts,
-            product.toJson()..remove('isFavorite'), // Avoid overwriting isFavorite if implementation differed, but here we separate tables or careful merge
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
+          await prodBox.put(product.id, product);
         }
-        await batch.commit(noResult: true);
 
         return Right(products);
       } catch (e) {
         return Left(ServerFailure(e.toString()));
       }
     } else {
-      // Fetch from local
+      // Fetch from local Hive box
       try {
-        final db = await dbService.database;
-        final maps = await db.query(
-          AppConstants.tableNameProducts,
-          limit: limit,
-          offset: skip,
-        );
-        final products = maps.map((e) => ProductModel.fromLocalMap(e)).toList();
+        final prodBox = dbService.productsBox;
+        final favBox = dbService.favoritesBox;
+
+        // Hive stores in no particular order (insertion order mostly), but keys are IDs.
+        // We need to implement pagination (skip/limit) manually on the list.
+        // This is not efficient for large datasets but typical for Hive/local simple caching.
+        final allProducts = prodBox.values.toList();
+
+        // Apply skip/limit
+        if (skip >= allProducts.length) {
+          return const Right([]);
+        }
+        final end =
+            (skip + limit < allProducts.length)
+                ? skip + limit
+                : allProducts.length;
+        final products =
+            allProducts.getRange(skip, end).map((p) {
+              // Ensure isFavorite is up to date (though strictly, prodBox should be updated on toggle)
+              // But let's check favBox to be sure
+              // Since ProductModel is immutable, we might need a copy if we want to enforce consistency
+              // But here we just return what's in box.
+              // Better: Check favBox.
+              bool isFav = favBox.containsKey(p.id);
+              if (p.isFavorite != isFav) {
+                // Return updated model (hacky without copyWith)
+                return ProductModel(
+                  id: p.id,
+                  title: p.title,
+                  description: p.description,
+                  category: p.category,
+                  price: p.price,
+                  discountPercentage: p.discountPercentage,
+                  rating: p.rating,
+                  stock: p.stock,
+                  brand: p.brand,
+                  thumbnail: p.thumbnail,
+                  images: p.images,
+                  availabilityStatus: p.availabilityStatus,
+                  warrantyInformation: p.warrantyInformation,
+                  updatedAt: p.updatedAt,
+                  isFavorite: isFav,
+                );
+              }
+              return p;
+            }).toList();
+
         return Right(products);
       } catch (e) {
         return Left(CacheFailure(e.toString()));
@@ -77,22 +121,58 @@ class ProductRepositoryImpl implements ProductRepository {
           AppConstants.searchEndpoint,
           queryParameters: {'q': query},
         );
-        final List productsJson = response.data['products'];
-        final products = productsJson.map((e) => ProductModel.fromJson(e)).toList();
+        final List productsRaw = response.data['products'];
+
+        final favBox = dbService.favoritesBox;
+
+        final products =
+            productsRaw.map((e) {
+              final json = e as Map<String, dynamic>;
+              final id = json['id'];
+              json['isFavorite'] = favBox.containsKey(id);
+              return ProductModel.fromJson(json);
+            }).toList();
+
         return Right(products);
       } catch (e) {
         return Left(ServerFailure(e.toString()));
       }
     } else {
-       // Search locally
-       try {
-        final db = await dbService.database;
-        final maps = await db.query(
-          AppConstants.tableNameProducts,
-          where: 'title LIKE ?',
-          whereArgs: ['%$query%'],
-        );
-        final products = maps.map((e) => ProductModel.fromLocalMap(e)).toList();
+      // Search locally
+      try {
+        final prodBox = dbService.productsBox;
+        final favBox = dbService.favoritesBox;
+
+        final products =
+            prodBox.values
+                .where((p) {
+                  return p.title.toLowerCase().contains(query.toLowerCase());
+                })
+                .map((p) {
+                  bool isFav = favBox.containsKey(p.id);
+                  if (p.isFavorite != isFav) {
+                    return ProductModel(
+                      id: p.id,
+                      title: p.title,
+                      description: p.description,
+                      category: p.category,
+                      price: p.price,
+                      discountPercentage: p.discountPercentage,
+                      rating: p.rating,
+                      stock: p.stock,
+                      brand: p.brand,
+                      thumbnail: p.thumbnail,
+                      images: p.images,
+                      availabilityStatus: p.availabilityStatus,
+                      warrantyInformation: p.warrantyInformation,
+                      updatedAt: p.updatedAt,
+                      isFavorite: isFav,
+                    );
+                  }
+                  return p;
+                })
+                .toList();
+
         return Right(products);
       } catch (e) {
         return Left(CacheFailure(e.toString()));
@@ -103,9 +183,31 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<Either<Failure, List<Product>>> getFavorites() async {
     try {
-      final db = await dbService.database;
-      final maps = await db.query(AppConstants.tableNameFavorites);
-      final products = maps.map((e) => ProductModel.fromLocalMap(e..['isFavorite'] = 1)).toList();
+      final favBox = dbService.favoritesBox;
+      final products =
+          favBox.values.map((p) {
+            // Ensure isFavorite is true
+            if (!p.isFavorite) {
+              return ProductModel(
+                id: p.id,
+                title: p.title,
+                description: p.description,
+                category: p.category,
+                price: p.price,
+                discountPercentage: p.discountPercentage,
+                rating: p.rating,
+                stock: p.stock,
+                brand: p.brand,
+                thumbnail: p.thumbnail,
+                images: p.images,
+                availabilityStatus: p.availabilityStatus,
+                warrantyInformation: p.warrantyInformation,
+                updatedAt: p.updatedAt,
+                isFavorite: true,
+              );
+            }
+            return p;
+          }).toList();
       return Right(products);
     } catch (e) {
       return Left(CacheFailure(e.toString()));
@@ -115,7 +217,8 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<Either<Failure, void>> addToFavorites(Product product) async {
     try {
-      final db = await dbService.database;
+      final favBox = dbService.favoritesBox;
+      // Convert to Model if not already (safest way involves re-creating)
       final productModel = ProductModel(
         id: product.id,
         title: product.title,
@@ -133,11 +236,8 @@ class ProductRepositoryImpl implements ProductRepository {
         updatedAt: product.updatedAt,
         isFavorite: true,
       );
-      await db.insert(
-        AppConstants.tableNameFavorites,
-        productModel.toJson()..remove('isFavorite'), // Remove isFavorite from map if table doesn't have it explicitly or if I just want to store data
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+
+      await favBox.put(product.id, productModel);
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure(e.toString()));
@@ -147,12 +247,8 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<Either<Failure, void>> removeFromFavorites(int productId) async {
     try {
-      final db = await dbService.database;
-      await db.delete(
-        AppConstants.tableNameFavorites,
-        where: 'id = ?',
-        whereArgs: [productId],
-      );
+      final favBox = dbService.favoritesBox;
+      await favBox.delete(productId);
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure(e.toString()));

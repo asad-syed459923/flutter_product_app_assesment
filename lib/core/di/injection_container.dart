@@ -22,7 +22,7 @@ class DependencyInjection {
     Get.put<NetworkInfo>(NetworkInfoImpl(Connectivity()));
     
     final dbService = DbService(); 
-    // Init DB early? Or lazy.
+    await dbService.init();
     Get.put<DbService>(dbService);
 
     // Repositories

@@ -39,7 +39,7 @@ class ProductController extends GetxController {
     scrollController.addListener(_onScroll);
     
     debounce(searchText, (value) {
-      search(value as String);
+      search(value);
     }, time: const Duration(milliseconds: 500));
   }
 
@@ -145,16 +145,28 @@ class ProductController extends GetxController {
         // Update local list for UI feedback (heart icon)
         final index = products.indexWhere((p) => p.id == product.id);
         if (index != -1) {
-          // This is a bit hacky with immutable entities, but cleaner than refetching all
-          // A better way is to wrap Product in a mutable wrapper or use copyWith
-          // I didn't add copyWith to Product Model. Let's add it or unsafe cast.
-          // Or just wait for FavoritesController to update?
-          // The products list is what drives the UI.
-          // Let's assume we re-fetch favorites?
-          // Since we have 'isFavorite' in Product, we need to toggle it.
-          // I will leave it for now or implement copyWith if time permits.
-          // Actually, GetProducts fetch merges DB data which has isFavorite.
-          // But instant feedback is nice.
+          final current = products[index];
+          final newStatus = !current.isFavorite;
+          
+          final newProduct = Product(
+            id: current.id,
+            title: current.title,
+            description: current.description,
+            category: current.category,
+            price: current.price,
+            discountPercentage: current.discountPercentage,
+            rating: current.rating,
+            stock: current.stock,
+            brand: current.brand,
+            thumbnail: current.thumbnail,
+            images: current.images,
+            availabilityStatus: current.availabilityStatus,
+            warrantyInformation: current.warrantyInformation,
+            updatedAt: current.updatedAt,
+            isFavorite: newStatus,
+          );
+          
+          products[index] = newProduct; 
         }
       },
     );

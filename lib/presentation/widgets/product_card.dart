@@ -74,6 +74,13 @@ class ProductCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${product.brand} - ${product.category}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
@@ -94,6 +101,20 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 2,
+                    children: [
+                      _buildBadge(product.availabilityStatus, Colors.blue),
+                      _buildBadge(product.warrantyInformation, Colors.orange),
+                    ],
+                  ),
+                   const SizedBox(height: 4),
+                   Text(
+                    'Updated: ${product.updatedAt.split('T').first}',
+                    style: TextStyle(fontSize: 9, color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
                    Row(
@@ -118,6 +139,21 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withOpacity(0.5), width: 0.5),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w500),
       ),
     );
   }
