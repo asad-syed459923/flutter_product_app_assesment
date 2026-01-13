@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 import 'package:flutter_product_app_assesment/domain/entities/product.dart';
 import 'package:flutter_product_app_assesment/presentation/widgets/product_card.dart';
+import 'package:flutter_product_app_assesment/translations/app_translations.dart';
 
 void main() {
   const tProduct = Product(
@@ -24,9 +26,14 @@ void main() {
   );
 
   testWidgets('ProductCard displays correct information', (WidgetTester tester) async {
+    Get.reset();
+    Get.put(AppTranslations());
+    
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(
-        MaterialApp(
+        GetMaterialApp(
+          translations: AppTranslations(),
+          locale: const Locale('en', 'US'),
           home: Scaffold(
             body: ProductCard(
               product: tProduct,
@@ -55,7 +62,7 @@ void main() {
 
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(
-        MaterialApp(
+        GetMaterialApp(
           home: Scaffold(
             body: ProductCard(
               product: tProduct,

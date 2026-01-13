@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/api_client.dart';
@@ -53,6 +54,11 @@ class ProductRepositoryImpl implements ProductRepository {
         }
 
         return Right(products);
+      } on DioException catch (e) {
+        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+          return const Left(ServerFailure('Connection timed out. Please try again.'));
+        }
+        return Left(ServerFailure(e.message ?? 'An unexpected server error occurred.'));
       } catch (e) {
         return Left(ServerFailure(e.toString()));
       }
@@ -128,6 +134,11 @@ class ProductRepositoryImpl implements ProductRepository {
             }).toList();
 
         return Right(products);
+      } on DioException catch (e) {
+        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+          return const Left(ServerFailure('Connection timed out. Please try again.'));
+        }
+        return Left(ServerFailure(e.message ?? 'An unexpected server error occurred.'));
       } catch (e) {
         return Left(ServerFailure(e.toString()));
       }
