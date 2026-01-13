@@ -34,7 +34,7 @@ class ProductRepositoryImpl implements ProductRepository {
         final List productsRaw = response.data['products'];
 
         // Fetch local favorites to merge status
-        // Efficient enough for Hive map lookup
+
         final favBox = dbService.favoritesBox;
 
         final products =
@@ -62,9 +62,7 @@ class ProductRepositoryImpl implements ProductRepository {
         final prodBox = dbService.productsBox;
         final favBox = dbService.favoritesBox;
 
-        // Hive stores in no particular order (insertion order mostly), but keys are IDs.
-        // We need to implement pagination (skip/limit) manually on the list.
-        // This is not efficient for large datasets but typical for Hive/local simple caching.
+        
         final allProducts = prodBox.values.toList();
 
         // Apply skip/limit
@@ -77,14 +75,10 @@ class ProductRepositoryImpl implements ProductRepository {
                 : allProducts.length;
         final products =
             allProducts.getRange(skip, end).map((p) {
-              // Ensure isFavorite is up to date (though strictly, prodBox should be updated on toggle)
-              // But let's check favBox to be sure
-              // Since ProductModel is immutable, we might need a copy if we want to enforce consistency
-              // But here we just return what's in box.
-              // Better: Check favBox.
+             
               bool isFav = favBox.containsKey(p.id);
               if (p.isFavorite != isFav) {
-                // Return updated model (hacky without copyWith)
+                // Return updated model 
                 return ProductModel(
                   id: p.id,
                   title: p.title,

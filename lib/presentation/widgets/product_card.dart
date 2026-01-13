@@ -51,7 +51,7 @@ class ProductCard extends StatelessWidget {
                   top: 4,
                   right: 4,
                   child: CircleAvatar(
-                    backgroundColor: Colors.white.withOpacity(0.8),
+                    backgroundColor: Colors.white.withAlpha(175),
                     radius: 14,
                     child: Icon(Icons.star, size: 16, color: Colors.amber),
                   ),
@@ -152,9 +152,9 @@ class ProductCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(30),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(0.5), width: 0.5),
+        border: Border.all(color: color.withAlpha(155), width: 0.5),
       ),
       child: Text(
         text,

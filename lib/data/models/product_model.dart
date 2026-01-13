@@ -69,22 +69,22 @@ class ProductModel extends Product {
     required this.updatedAt,
     this.isFavorite = false,
   }) : super(
-          id: id,
-          title: title,
-          description: description,
-          category: category,
-          price: price,
-          discountPercentage: discountPercentage,
-          rating: rating,
-          stock: stock,
-          brand: brand,
-          thumbnail: thumbnail,
-          images: images,
-          availabilityStatus: availabilityStatus,
-          warrantyInformation: warrantyInformation,
-          updatedAt: updatedAt,
-          isFavorite: isFavorite,
-        );
+         id: id,
+         title: title,
+         description: description,
+         category: category,
+         price: price,
+         discountPercentage: discountPercentage,
+         rating: rating,
+         stock: stock,
+         brand: brand,
+         thumbnail: thumbnail,
+         images: images,
+         availabilityStatus: availabilityStatus,
+         warrantyInformation: warrantyInformation,
+         updatedAt: updatedAt,
+         isFavorite: isFavorite,
+       );
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -93,7 +93,8 @@ class ProductModel extends Product {
       description: json['description'] ?? 'No Description',
       category: json['category'] ?? 'Uncategorized',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      discountPercentage: (json['discountPercentage'] as num?)?.toDouble() ?? 0.0,
+      discountPercentage:
+          (json['discountPercentage'] as num?)?.toDouble() ?? 0.0,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       stock: json['stock'] ?? 0,
       brand: json['brand'] ?? 'Unknown Brand',
@@ -137,7 +138,10 @@ class ProductModel extends Product {
       stock: map['stock'],
       brand: map['brand'],
       thumbnail: map['thumbnail'],
-      images: map['images'] != null ? (jsonDecode(map['images']) as List).cast<String>() : [],
+      images:
+          map['images'] != null
+              ? (jsonDecode(map['images']) as List).cast<String>()
+              : [],
       availabilityStatus: map['availabilityStatus'] ?? 'Unknown',
       warrantyInformation: map['warrantyInformation'] ?? 'No Warranty Info',
       updatedAt: map['updatedAt'] ?? '',

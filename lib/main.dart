@@ -21,16 +21,14 @@ class ProductAssessment extends StatelessWidget {
       title: 'Product Store',
       debugShowCheckedModeBanner: false,
 
-      // Theme Management
       theme: ThemeData.light(useMaterial3: true),
       darkTheme: ThemeData.dark(useMaterial3: true),
-      themeMode: ThemeMode.system, // Default system, overridden by controller
-      // Localization
+      themeMode: ThemeMode.system,
+
       translations: AppTranslations(),
-      locale: const Locale('en', 'US'), // Default, overridden by controller
+      locale: const Locale('en', 'US'),
       fallbackLocale: const Locale('en', 'US'),
 
-      // Navigation
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
     );

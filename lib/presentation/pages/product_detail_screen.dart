@@ -10,8 +10,7 @@ class ProductDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Product product = Get.arguments;
-    final ProductController productController =
-        Get.find(); // Find existing controller
+    final ProductController productController = Get.find();
 
     return Scaffold(
       body: CustomScrollView(
@@ -53,7 +52,7 @@ class ProductDetailScreen extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.blueAccent.withOpacity(0.1),
+                            color: Colors.blueAccent.withAlpha(100),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(

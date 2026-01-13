@@ -13,8 +13,7 @@ class DbService {
 
   Future<void> init() async {
     // Initialize Hive
-    // path_provider is included in hive_flutter usually but explicit checking is good
-    // Hive.initFlutter() handles path automatically.
+    
     await Hive.initFlutter();
     
     // Register Adapters
